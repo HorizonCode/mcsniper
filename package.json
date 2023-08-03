@@ -1,0 +1,39 @@
+{
+  "name": "mcsniper",
+  "version": "1.0.0",
+  "description": "a tool to retrieve your desired username when you know it gets available",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "npm run compile && node ./dist/index.js",
+    "compile": "tsc",
+    "package": "npm run compile && pkg -t node18-mac,node18-linux-x64,node18-win-x64 -o ./release/mcsniper ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HorizonCode/mcsniper.git"
+  },
+  "keywords": [
+    "minecraft",
+    "username",
+    "sniping"
+  ],
+  "author": "HorizonCode",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/HorizonCode/mcsniper/issues"
+  },
+  "homepage": "https://github.com/HorizonCode/mcsniper#readme",
+  "devDependencies": {
+    "@types/node": "^20.4.6",
+    "pkg": "^5.8.1",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "enquirer": "^2.4.1",
+    "nanospinner": "^1.1.0",
+    "node-fetch": "^3.3.2",
+    "ora": "^7.0.1",
+    "string-template": "^1.0.0"
+  }
+}
