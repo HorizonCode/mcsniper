@@ -2,6 +2,6 @@
   "files": ["./index.ts", "./format.ts"],
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["ES2015", "ES2015.Promise", "DOM"]
+    "lib": ["ES2015", "DOM"]
   }
 }
