@@ -1,6 +1,7 @@
 import { prompt } from "enquirer";
 import { createSpinner } from "nanospinner";
 import { format } from "./format";
+import { textSync } from "figlet";
 
 let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
@@ -14,6 +15,15 @@ process.emitWarning = (warning, arg, ...rest) => {
 };
 
 (async () => {
+  console.log(
+    textSync("mcsniper", {
+      font: "Larry 3D 2",
+      horizontalLayout: "default",
+      verticalLayout: "default",
+      whitespaceBreak: false,
+    }),
+  );
+
   const token = (await prompt({
     type: "password",
     name: "authorization-token",
