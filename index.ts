@@ -53,15 +53,31 @@ process.emitWarning = (warning, arg, ...rest) => {
         return value.length > 0;
       },
     }))["msemail"];
+    const authSpinner = createSpinner("Waiting for authentication...");
     const authflow = new Authflow(msEmail, undefined, {
       flow: 'live',
       password: msPassword,
       authTitle: Titles.MinecraftJava
-
+    }, (res) => {
+      console.log("First time signing in. Please authenticate!");
+      console.log("URL:", res.verification_uri);
+      console.log("Code:", res.device_code);
+      authSpinner.start();
     });
-    const mcToken = await authflow.getMinecraftJavaToken();
-    if (mcToken.token) {
-      authToken = mcToken.token;
+
+    try {
+      const mcToken = await authflow.getMinecraftJavaToken();
+      authSpinner.success({
+        text: "Authenticated successfully!"
+      });
+      if (mcToken.token)
+        authToken = mcToken.token;
+
+    } catch (err) {
+      authSpinner.error({
+        text: "Authentication failed!"
+      });
+      return;
     }
   } else {
     authToken = (await prompt({
