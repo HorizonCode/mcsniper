@@ -35,6 +35,7 @@
     "figlet": "^1.6.0",
     "nanospinner": "^1.1.0",
     "node-fetch": "^3.3.2",
-    "ora": "^7.0.1"
+    "ora": "^7.0.1",
+    "prismarine-auth": "^2.2.0"
   }
 }

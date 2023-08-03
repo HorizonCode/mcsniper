@@ -2,6 +2,7 @@ import { prompt } from "enquirer";
 import { createSpinner } from "nanospinner";
 import { format } from "./format";
 import { textSync } from "figlet";
+import { Authflow, Titles } from 'prismarine-auth';
 
 let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
@@ -24,11 +25,51 @@ process.emitWarning = (warning, arg, ...rest) => {
     }),
   );
 
-  const token = (await prompt({
-    type: "password",
-    name: "authorization-token",
-    message: "Please input your Authorization-Token!",
-  }))["authorization-token"];
+  const authMethods = ["Micosoft Account", "Authorization-Token (Bearer)"];
+
+  const authMethod = (await prompt({
+    type: "select",
+    message: "Select which authentication method you want to use",
+    choices: authMethods,
+    name: "authmethod"
+  }))["authmethod"];
+
+  let authToken;
+
+  if (authMethod == "Micosoft Account") {
+    const msEmail = (await prompt({
+      type: "input",
+      name: "msemail",
+      message: "Please enter your Microsoft Email!",
+      validate(value) {
+        return value.length > 0 && value.includes("@") ? true : "Please enter a valid email!";
+      },
+    }))["msemail"];
+    const msPassword = (await prompt({
+      type: "password",
+      name: "msemail",
+      message: "Please enter your Microsoft Password!",
+      validate(value) {
+        return value.length > 0;
+      },
+    }))["msemail"];
+    const authflow = new Authflow(msEmail, undefined, {
+      flow: 'live',
+      password: msPassword,
+      authTitle: Titles.MinecraftJava
+
+    });
+    const mcToken = await authflow.getMinecraftJavaToken();
+    if (mcToken.token) {
+      authToken = mcToken.token;
+    }
+  } else {
+    authToken = (await prompt({
+      type: "password",
+      name: "authorization-token",
+      message: "Please input your Authorization-Token!",
+    }))["authorization-token"];
+  }
 
   const newUsername = (await prompt({
     type: "input",
@@ -46,7 +87,7 @@ process.emitWarning = (warning, arg, ...rest) => {
   try {
     const checkResult = await fetch(apiCheck, {
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": `Bearer ${authToken}`,
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
         "Refferer": "https://www.minecraft.net/",
@@ -70,7 +111,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     const interval = setInterval(async () => {
       const changeResult = await fetch(apiUpdate, {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${authToken}`,
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
           "Refferer": "https://www.minecraft.net/",
