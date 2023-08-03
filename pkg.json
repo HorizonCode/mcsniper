@@ -1,0 +1,9 @@
+{
+  "pkg": {
+    "assets": [
+      "./node_modules/figlet/fonts/Larry 3D 2.flf"
+    ],
+    "targets": ["node18-mac", "node18-linux-x64", "node18-win-x64"],
+    "outputPath": "release/"
+  }
+}

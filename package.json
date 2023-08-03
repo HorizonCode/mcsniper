@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run compile && node ./dist/index.js",
     "compile": "tsc",
-    "package": "npm run compile && pkg -t node18-mac,node18-linux-x64,node18-win-x64 -o ./release/mcsniper ./dist/index.js"
+    "package": "npm run compile && pkg ./dist/index.js -c ./pkg.json -o ./release/mcsniper"
   },
   "repository": {
     "type": "git",
