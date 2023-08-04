@@ -8,7 +8,7 @@ let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
 
 let apiUpdate =
-  "https://api.minecraftservices.com/minecraft/profile/name/{name}";
+  "https://api.minecraftservices.com/minecraft/profile/name/{username}";
 
 process.emitWarning = (warning, arg, ...rest) => {
   if (arg === "ExperimentalWarning") return; // kys fetch
