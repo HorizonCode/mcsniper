@@ -145,18 +145,17 @@ process.emitWarning = (warning, arg, ...rest) => {
         return;
       }
       const changeJson = await changeResult.json();
+      if("name" in changeJson){
+        checkSpinner.success({
+          text: "Got desired username!",
+        });
+        clearInterval(interval);
+      }
       if (!("errorMessage" in changeJson) && !("details" in changeJson)) {
         checkSpinner.error({
           text: "Bearer Token expired or timed out.",
         });
         console.log(JSON.stringify(changeJson, null, 2));
-        clearInterval(interval);
-        return;
-      }
-      if (!("errorMessage" in changeJson)) {
-        checkSpinner.success({
-          text: "Got no error, this could mean you got your Username!",
-        });
         clearInterval(interval);
         return;
       }
