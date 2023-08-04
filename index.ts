@@ -2,7 +2,7 @@ import { prompt } from "enquirer";
 import { createSpinner } from "nanospinner";
 import { format } from "./format";
 import { textSync } from "figlet";
-import { Authflow, Titles } from 'prismarine-auth';
+import { Authflow, Titles } from "prismarine-auth";
 
 let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
@@ -31,7 +31,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     type: "select",
     message: "Select which authentication method you want to use",
     choices: authMethods,
-    name: "authmethod"
+    name: "authmethod",
   }))["authmethod"];
 
   let authToken;
@@ -42,7 +42,9 @@ process.emitWarning = (warning, arg, ...rest) => {
       name: "msemail",
       message: "Please enter your Microsoft Email!",
       validate(value) {
-        return value.length > 0 && value.includes("@") ? true : "Please enter a valid email!";
+        return value.length > 0 && value.includes("@")
+          ? true
+          : "Please enter a valid email!";
       },
     }))["msemail"];
     const msPassword = (await prompt({
@@ -55,9 +57,9 @@ process.emitWarning = (warning, arg, ...rest) => {
     }))["msemail"];
     const authSpinner = createSpinner("Waiting for authentication...");
     const authflow = new Authflow(msEmail, undefined, {
-      flow: 'live',
+      flow: "live",
       password: msPassword,
-      authTitle: Titles.MinecraftJava
+      authTitle: Titles.MinecraftJava,
     }, (res) => {
       console.log("First time signing in. Please authenticate!");
       console.log("URL:", res.verification_uri);
@@ -68,14 +70,14 @@ process.emitWarning = (warning, arg, ...rest) => {
     try {
       const mcToken = await authflow.getMinecraftJavaToken();
       authSpinner.success({
-        text: "Authenticated successfully!"
+        text: "Authenticated successfully!",
       });
-      if (mcToken.token)
+      if (mcToken.token) {
         authToken = mcToken.token;
-
+      }
     } catch (err) {
       authSpinner.error({
-        text: "Authentication failed!"
+        text: "Authentication failed!",
       });
       return;
     }
@@ -145,13 +147,25 @@ process.emitWarning = (warning, arg, ...rest) => {
         return;
       }
       const changeJson = await changeResult.json();
-      if("name" in changeJson){
+      if ("name" in changeJson) {
         checkSpinner.success({
           text: "Got desired username!",
         });
         clearInterval(interval);
       }
-      if (!("errorMessage" in changeJson) && !("details" in changeJson)) {
+      if (changeResult.status == 404) {
+        checkSpinner.error({
+          text:
+            "It appears that you dont have a active copy of Minecraft on that Account.",
+        });
+        console.log(JSON.stringify(changeJson, null, 2));
+        clearInterval(interval);
+        return;
+      }
+      if (
+        changeResult.status == 400 || changeResult.status == 401 ||
+        changeResult.status == 403
+      ) {
         checkSpinner.error({
           text: "Bearer Token expired or timed out.",
         });
