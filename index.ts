@@ -27,19 +27,19 @@ process.emitWarning = (warning, arg, ...rest) => {
 
   const authMethods = ["Microsoft Account", "Authorization-Token (Bearer)"];
 
-  const authMethod = (await prompt({
+  const { authMethod }: Record<string, string> = await prompt({
     type: "select",
     message: "Select which authentication method you want to use",
     choices: authMethods,
-    name: "authmethod",
-  }))["authmethod"];
+    name: "authMethod",
+  });
 
   let authToken: string;
 
   if (authMethod == "Microsoft Account") {
-    const msEmail = (await prompt({
+    const { msEmail, msPassword }: Record<string, string> = await prompt([{
       type: "input",
-      name: "msemail",
+      name: "msEmail",
       message: "Please enter your Microsoft Email!",
       validate(value) {
         return /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/
@@ -47,15 +47,15 @@ process.emitWarning = (warning, arg, ...rest) => {
           ? true
           : "Please enter a valid email!";
       },
-    }))["msemail"];
-    const msPassword = (await prompt({
+    }, {
       type: "password",
-      name: "msemail",
+      name: "msPassword",
       message: "Please enter your Microsoft Password!",
       validate(value) {
         return value.length > 0;
       },
-    }))["msemail"];
+    }]);
+
     const mcToken = await authenticate(
       msEmail,
       msPassword,
@@ -71,16 +71,16 @@ process.emitWarning = (warning, arg, ...rest) => {
     }))["authorization-token"];
   }
 
-  const newUsername = (await prompt({
+  const { newUsername }: Record<string, string> = await prompt({
     type: "input",
-    name: "username",
+    name: "newUsername",
     message: "Please input your desired Username!",
     validate(value) {
       return /^[a-zA-Z0-9_]{2,16}$/mg.test(value)
         ? true
         : "Invalid Minecraft Username.";
     },
-  }))["username"];
+  });
 
   const headers = {
     "Authorization": `Bearer ${authToken}`,
