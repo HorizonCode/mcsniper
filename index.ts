@@ -25,7 +25,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     }),
   );
 
-  const authMethods = ["Micosoft Account", "Authorization-Token (Bearer)"];
+  const authMethods = ["Microsoft Account", "Authorization-Token (Bearer)"];
 
   const authMethod = (await prompt({
     type: "select",
@@ -36,13 +36,13 @@ process.emitWarning = (warning, arg, ...rest) => {
 
   let authToken;
 
-  if (authMethod == "Micosoft Account") {
+  if (authMethod == "Microsoft Account") {
     const msEmail = (await prompt({
       type: "input",
       name: "msemail",
       message: "Please enter your Microsoft Email!",
       validate(value) {
-        return value.length > 0 && value.includes("@")
+        return /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/.test(value)
           ? true
           : "Please enter a valid email!";
       },
@@ -94,7 +94,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     name: "username",
     message: "Please input your desired Username!",
     validate(value) {
-      return value.length > 0;
+      return /^[a-zA-Z0-9_]{2,16}$/mg.test(value) ? true : "Invalid Minecraft Username.";
     },
   }))["username"];
 
