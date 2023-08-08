@@ -2,7 +2,7 @@ import { prompt } from "enquirer";
 import { createSpinner } from "nanospinner";
 import { format } from "./format";
 import { textSync } from "figlet";
-import { Authflow, Titles } from "prismarine-auth";
+import { authenticate } from "./msauth";
 
 let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
@@ -42,7 +42,8 @@ process.emitWarning = (warning, arg, ...rest) => {
       name: "msemail",
       message: "Please enter your Microsoft Email!",
       validate(value) {
-        return /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/.test(value)
+        return /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/
+            .test(value)
           ? true
           : "Please enter a valid email!";
       },
@@ -55,32 +56,13 @@ process.emitWarning = (warning, arg, ...rest) => {
         return value.length > 0;
       },
     }))["msemail"];
-    const authSpinner = createSpinner("Waiting for authentication...");
-    const authflow = new Authflow(msEmail, undefined, {
-      flow: "live",
-      password: msPassword,
-      authTitle: Titles.MinecraftJava,
-    }, (res) => {
-      console.log("First time signing in. Please authenticate!");
-      console.log("URL:", res.verification_uri);
-      console.log("Code:", res.device_code);
-      authSpinner.start();
-    });
-
-    try {
-      const mcToken = await authflow.getMinecraftJavaToken();
-      authSpinner.success({
-        text: "Authenticated successfully!",
-      });
-      if (mcToken.token) {
-        authToken = mcToken.token;
-      }
-    } catch (err) {
-      authSpinner.error({
-        text: "Authentication failed!",
-      });
-      return;
-    }
+    const mcToken = authenticate(
+      msEmail,
+      msPassword,
+      createSpinner("Waiting for authentication..."),
+    );
+    if (mcToken) authToken = mcToken;
+    else return;
   } else {
     authToken = (await prompt({
       type: "password",
@@ -94,9 +76,19 @@ process.emitWarning = (warning, arg, ...rest) => {
     name: "username",
     message: "Please input your desired Username!",
     validate(value) {
-      return /^[a-zA-Z0-9_]{2,16}$/mg.test(value) ? true : "Invalid Minecraft Username.";
+      return /^[a-zA-Z0-9_]{2,16}$/mg.test(value)
+        ? true
+        : "Invalid Minecraft Username.";
     },
   }))["username"];
+
+  const headers = {
+    "Authorization": `Bearer ${authToken}`,
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
+    "Refferer": "https://www.minecraft.net/",
+    "Origin": "https://www.minecraft.net",
+  };
 
   apiCheck = format(apiCheck, { username: newUsername });
   apiUpdate = format(apiUpdate, { username: newUsername });
@@ -104,13 +96,7 @@ process.emitWarning = (warning, arg, ...rest) => {
   const spinner = createSpinner("Checking Authorization-Token").start();
   try {
     const checkResult = await fetch(apiCheck, {
-      headers: {
-        "Authorization": `Bearer ${authToken}`,
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
-        "Refferer": "https://www.minecraft.net/",
-        "Origin": "https://www.minecraft.net",
-      },
+      headers,
       method: "GET",
     });
     if (checkResult.status != 200) {
@@ -128,13 +114,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     ).start();
     const interval = setInterval(async () => {
       const changeResult = await fetch(apiUpdate, {
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
-          "Refferer": "https://www.minecraft.net/",
-          "Origin": "https://www.minecraft.net",
-        },
+        headers,
         method: "GET",
       });
       tries = tries + 1;
