@@ -3,6 +3,7 @@ import { createSpinner } from "nanospinner";
 import { format } from "./format";
 import { textSync } from "figlet";
 import { authenticate } from "./msauth";
+import { MSAPIClient } from "./MSAPIClient";
 
 let apiCheck =
   "https://api.minecraftservices.com/minecraft/profile/name/{username}/available";
@@ -108,59 +109,12 @@ process.emitWarning = (warning, arg, ...rest) => {
     spinner.success({
       text: "Authorization-Token valid!",
     });
-    let tries = 0;
-    const checkSpinner = createSpinner(
-      `Trying to get Username... (${tries} times tried)`,
-    ).start();
-    const interval = setInterval(async () => {
-      const changeResult = await fetch(apiUpdate, {
-        headers,
-        method: "GET",
-      });
-      tries = tries + 1;
-      if (!changeResult.headers.get("Content-Type").includes("json")) {
-        clearInterval(interval);
-        checkSpinner.error({
-          text: "API Request failed, non json response",
-        });
-        console.log(changeResult.headers.get("Content-Type"));
-        return;
-      }
-      const changeJson = await changeResult.json();
-      if ("name" in changeJson) {
-        checkSpinner.success({
-          text: "Got desired username!",
-        });
-        clearInterval(interval);
-      }
-      if (changeResult.status == 404) {
-        checkSpinner.error({
-          text:
-            "It appears that you dont have a active copy of Minecraft on that Account.",
-        });
-        console.log(JSON.stringify(changeJson, null, 2));
-        clearInterval(interval);
-        return;
-      }
-      if (
-        changeResult.status == 400 || changeResult.status == 401 ||
-        changeResult.status == 403
-      ) {
-        checkSpinner.error({
-          text: "Bearer Token expired or timed out.",
-        });
-        console.log(JSON.stringify(changeJson, null, 2));
-        clearInterval(interval);
-        return;
-      }
-      checkSpinner.update({
-        text: `Trying to get Username... (${tries} times tried)`,
-      });
-    }, 1000 * 7);
   } catch (err) {
     spinner.error({
       text: "API Request failed.",
     });
     console.log(err);
   }
+
+  new MSAPIClient({ apiUpdate, headers });
 })();
