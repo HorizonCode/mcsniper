@@ -34,7 +34,7 @@ process.emitWarning = (warning, arg, ...rest) => {
     name: "authmethod",
   }))["authmethod"];
 
-  let authToken;
+  let authToken: string;
 
   if (authMethod == "Microsoft Account") {
     const msEmail = (await prompt({
@@ -56,7 +56,7 @@ process.emitWarning = (warning, arg, ...rest) => {
         return value.length > 0;
       },
     }))["msemail"];
-    const mcToken = authenticate(
+    const mcToken = await authenticate(
       msEmail,
       msPassword,
       createSpinner("Waiting for authentication..."),
